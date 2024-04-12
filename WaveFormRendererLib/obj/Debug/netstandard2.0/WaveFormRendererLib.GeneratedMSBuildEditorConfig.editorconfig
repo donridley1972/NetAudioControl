@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = NAudio.WaveFormRenderer
+build_property.ProjectDir = C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

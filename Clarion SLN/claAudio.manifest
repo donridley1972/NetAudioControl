@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity name="claAudio" version="1.0.0.0" processorArchitecture="x86"></assemblyIdentity>
+<clrClass clsid="{E97135B1-F369-36DD-A6F0-E9925699987A}" progid="ClaAudio" threadingModel="Both" name="claAudio.AudioControl" runtimeVersion="v4.0.30319"></clrClass>
+<clrClass clsid="{E4FA5365-4B55-38FD-9632-269C8254C5AE}" progid="claAudio.AudioControl+OutputDevicesData" threadingModel="Both" name="claAudio.AudioControl+OutputDevicesData" runtimeVersion="v4.0.30319"></clrClass>
+<clrClass clsid="{A9F970ED-01DD-38BA-A9C5-A3680DF14F11}" progid="claAudio.AudioControl+OnSendOutputDevice" threadingModel="Both" name="claAudio.AudioControl+OnSendOutputDevice" runtimeVersion="v4.0.30319"></clrClass>
+<file name="claAudio.dll" hashalg="SHA1"></file>
+</assembly>

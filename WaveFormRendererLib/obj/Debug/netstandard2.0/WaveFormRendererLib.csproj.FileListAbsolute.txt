@@ -1,0 +1,21 @@
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.deps.json
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.dll
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.pdb
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.csproj.AssemblyReference.cache
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.GeneratedMSBuildEditorConfig.editorconfig
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.AssemblyInfoInputs.cache
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.AssemblyInfo.cs
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.csproj.CoreCompileInputs.cache
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.sourcelink.json
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\NAudio.WaveFormRenderer.dll
+D:\Visual Studio Examples\NAudio WaveFormRenderer\WaveFormRendererLib\obj\Debug\netstandard2.0\NAudio.WaveFormRenderer.pdb
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.deps.json
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.dll
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\bin\Debug\netstandard2.0\NAudio.WaveFormRenderer.pdb
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.csproj.AssemblyReference.cache
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.AssemblyInfoInputs.cache
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.AssemblyInfo.cs
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\WaveFormRendererLib.csproj.CoreCompileInputs.cache
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\NAudio.WaveFormRenderer.dll
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\Debug\netstandard2.0\NAudio.WaveFormRenderer.pdb

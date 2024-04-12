@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "TDFnwP2WTSrTgyIOM9SMagcTZHGsQ9NvIS3PUTypSxRWzOCIm9osTSX1CsksH20S+4aHVTLKCrqbJNWD5D5NoA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Don\\source\\repos\\claAudio\\WaveFormRendererLib\\WaveFormRendererLib.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Don\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Don\\.nuget\\packages\\naudio.core\\2.2.1\\naudio.core.2.2.1.nupkg.sha512",
+    "C:\\Users\\Don\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\Don\\.nuget\\packages\\system.drawing.common\\8.0.4\\system.drawing.common.8.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}
