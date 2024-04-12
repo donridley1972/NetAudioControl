@@ -310,4 +310,5 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?VolumeMeter:Radio1, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio1
   SELF.SetStrategy(?VolumeMeter:Radio2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio2
   SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
+  SELF.SetStrategy(?LastDeviceGuid, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?LastDeviceGuid
 
