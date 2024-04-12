@@ -8,7 +8,7 @@
     <AssemblyName>AudioExample</AssemblyName>
     <OutputName>AudioExample</OutputName>
     <CWOutputType>Exe</CWOutputType>
-    <DefineConstants>StringTheoryLinkMode=&gt;1%3bStringTheoryDllMode=&gt;0%3bMD5=&gt;0%3bjFilesLinkMode=&gt;1%3bjFilesDllMode=&gt;0%3b_JFILES_=&gt;1%3bReflectionLM=&gt;1%3bReflectionDM=&gt;0%3b_RASLinkMode_=&gt;1%3b_RASDllMode_=&gt;0%3b_ABCDllMode_=&gt;0%3b_ABCLinkMode_=&gt;1</DefineConstants>
+    <DefineConstants>_ABCDllMode_=&gt;0%3b_ABCLinkMode_=&gt;1</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>True</DebugSymbols>
@@ -37,11 +37,6 @@
     <Compile Include="AudioExample_BC0.CLW">
       <Generated>true</Generated>
     </Compile>
-    <None Include="zlibwapi.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Generated>True</Generated>
-      <ProjectGenerated>True</ProjectGenerated>
-    </None>
   </ItemGroup>
   <Import Project="$(ClarionBinPath)\SoftVelocity.Build.Clarion.targets" />
 </Project>

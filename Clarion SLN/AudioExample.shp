@@ -32,5 +32,3 @@ ___    ClaOLE.DLL - Clarion OLE Support Library
      NOTE: It is possible that OLE and OCX files might not be in this list. Please
            take care to include all files used.
 
-  ___    ZLIBWAPI.DLL
-  

@@ -51,7 +51,7 @@ namespace claAudio
         protected OutputDevicesData selectedDataStructure = null;
 
         public event OnSendOutputDevice SendOutputDevice;
-        public delegate void OnSendOutputDevice(string pJson);
+        public delegate void OnSendOutputDevice(string pGuid,string pModule,string pDescription);
 
         public AudioControl()
         {
@@ -306,7 +306,7 @@ namespace claAudio
                 //Trace.WriteLine($"{dev.Guid} {dev.ModuleName} {dev.Description}");
                 //comboBoxOutputDevices.Items.Add(dev.Description);
                 outputDevicesItems.Add(new OutputDevicesData { DevideGUID = dev.Guid, ModuleName = dev.ModuleName, Description = dev.Description });
-                //SendOutputDevice(dev.Guid.ToString(), dev.Description);
+                SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description);
                 //Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.Description)));
             }
 

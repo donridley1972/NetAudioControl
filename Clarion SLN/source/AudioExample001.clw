@@ -3,6 +3,7 @@
    MEMBER('AudioExample.clw')                              ! This is a MEMBER module
 
 
+   INCLUDE('ABRESIZE.INC'),ONCE
    INCLUDE('ABTOOLBA.INC'),ONCE
    INCLUDE('ABUTIL.INC'),ONCE
    INCLUDE('ABWINDOW.INC'),ONCE
@@ -33,8 +34,8 @@ VolumeMeter          LONG                                  !
 FileFormat           STRING(50)                            ! 
 AudioPosition        STRING(50)                            ! 
 MyTrace         dwrTrace
-json            JSONClass
-st              StringTheory
+!json            JSONClass
+!st              StringTheory
 Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
   SYSTEM,IMM
                        BUTTON('Close'),AT(427,174),USE(?Close)
@@ -77,14 +78,10 @@ TakeEvent              PROCEDURE(),BYTE,PROC,DERIVED
                      END
 
 Toolbar              ToolbarClass
-! ----- csResize --------------------------------------------------------------------------
-csResize             Class(csResizeClass)
-    ! derived method declarations
-Fetch                  PROCEDURE (STRING Sect,STRING Ent,*? Val),VIRTUAL
-Update                 PROCEDURE (STRING Sect,STRING Ent,STRING Val),VIRTUAL
-Init                   PROCEDURE (),VIRTUAL
-                     End  ! csResize
-! ----- end csResize -----------------------------------------------------------------------
+Resizer              CLASS(WindowResizeClass)
+Init                   PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize=False,BYTE SetWindowMaxSize=False)
+                     END
+
 FileLookup3          SelectFileClass
 
   CODE
@@ -128,24 +125,26 @@ ReturnValue          BYTE,AUTO
   OCXRegisterEventProc(?OLE,MainOLEEventHandler)
   OCXRegisterPropChange(?OLE,MainOLEPropChange)
   OCXRegisterPropEdit(?OLE,MainOLEPropEdit)
+  Resizer.Init(AppStrategy:Spread,Resize:SetMinSize)       ! Controls will spread out as the window gets bigger
+  SELF.AddItem(Resizer)                                    ! Add resizer to window manager
   
   
-  csResize.Init('Main',Window,1)
   INIMgr.Fetch('Main',Window)                              ! Restore window settings from non-volatile store
+  Resizer.Resize                                           ! Reset required after window size altered by INI manager
   FileLookup3.Init
   FileLookup3.ClearOnCancel = True
   FileLookup3.Flags=BOR(FileLookup3.Flags,FILE:LongName)   ! Allow long filenames
   FileLookup3.SetMask('Audio Files','*.wav;*.mp3')         ! Set the file mask
-  csResize.Open()
   SELF.SetAlerts()
-    st.SetValue(?OLE{'GetOutputDevices()'})
-    MyTrace.Trace('')
-    MyTrace.Trace(st.GetValue())
-    MyTrace.Trace('')  
-    Free(AudioDevices)
-    json.start()
-    json.SetTagCase(jf:CaseAsIs)
-    json.Load(AudioDevices,st)
+    ?OLE{'GetOutputDevices()'}
+  !    st.SetValue(?OLE{'GetOutputDevices()'})
+  !    MyTrace.Trace('')
+  !    MyTrace.Trace(st.GetValue())
+  !    MyTrace.Trace('')  
+  !    Free(AudioDevices)
+  !    json.start()
+  !    json.SetTagCase(jf:CaseAsIs)
+  !    json.Load(AudioDevices,st)
   RETURN ReturnValue
 
 
@@ -230,7 +229,6 @@ ReturnValue          BYTE,AUTO
 
 Looped BYTE
   CODE
-  csResize.TakeEvent()
   LOOP                                                     ! This method receives all events
     IF Looped
       RETURN Level:Notify
@@ -248,60 +246,21 @@ Looped BYTE
   ReturnValue = Level:Fatal
   RETURN ReturnValue
 
-!----------------------------------------------------
-csResize.Fetch   PROCEDURE (STRING Sect,STRING Ent,*? Val)
-  CODE
-  INIMgr.Fetch(Sect,Ent,Val)
-  PARENT.Fetch (Sect,Ent,Val)
-!----------------------------------------------------
-csResize.Update   PROCEDURE (STRING Sect,STRING Ent,STRING Val)
-  CODE
-  INIMgr.Update(Sect,Ent,Val)
-  PARENT.Update (Sect,Ent,Val)
-!----------------------------------------------------
-csResize.Init   PROCEDURE ()
-  CODE
-  PARENT.Init ()
-  Self.CornerStyle = Ras:CornerDots
-  SELF.GrabCornerLines() !
-  SELF.SetStrategy(?Close,100,100,0,0)
-  SELF.SetStrategy(?SHEET1,0,0,100,100)
-  SELF.SetStrategy(?OLE,0,0,100,100)
 !---------------------------------------------------
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
 !MyTrace         dwrTrace
 !json            JSONClass
 !st              StringTheory
   CODE
-    !MyTrace.Trace(OLEEvent)
     Case OLEEvent 
-        Of 301
-        !MyTrace.Trace('Event 301')
-        If OcxGetParamCount(ref)
-            !OleSt.Trace('MainOLEEventHandler - OLEEvent[' & OLEEvent & ']')
-            !MyTrace.Trace(OcxGetParam(ref, 1) & ' ' & OcxGetParam(ref, 2))
-            !MyTrace.Trace(OcxGetParam(ref, 1))
-            !st.SetValue(OcxGetParam(ref, 1))
-            !if st.Length() > 1
-            !    Free(AudioDevices)
-            !    json.start()
-            !    json.SetTagCase(jf:CaseAsIs)
-            !    json.Load(AudioDevices,st)
-            !End
-            !OleSt.Trace(OcxGetParam(ref, 2))
-            
-            !NMEAString = OcxGetParam(ref, 1) !Glo:NmeaSentence
-            !GpsJSON = OcxGetParam(ref, 2)
-            !NMEAString = OcxGetParam(ref, 1) !Glo:NmeaSentence
-            !Glo:NmeaJSON = OcxGetParam(ref, 2)
-            !Post(EVENT:TestEvent)
-            !Post(Event:NmeaReceived)
-        End
-        Of 302
-            !If OcxGetParamCount(ref)
-            !    DotNETLog = OcxGetParam(ref, 1)
-           !     Post(Event:UpdateStatus)
-           ! End
+    Of 301
+    If OcxGetParamCount(ref)
+        AudioDevices.DevideGUID = OcxGetParam(ref, 1)
+        AudioDevices.ModuleName = OcxGetParam(ref, 2)
+        AudioDevices.Description = OcxGetParam(ref, 3)
+        Add(AudioDevices)
+    End
+    Of 302
     End  
   RETURN(True)
 !---------------------------------------------------
@@ -311,3 +270,33 @@ MainOLEPropChange PROCEDURE(SIGNED OLEControlFEQ,STRING ChangedProperty)
 MainOLEPropEdit FUNCTION(SIGNED OLEControlFEQ,STRING EditedProperty)
   CODE
   RETURN(0)
+
+Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize=False,BYTE SetWindowMaxSize=False)
+
+
+  CODE
+  PARENT.Init(AppStrategy,SetWindowMinSize,SetWindowMaxSize)
+  SELF.SetParentDefaults()                                 ! Calculate default control parent-child relationships based upon their positions on the window
+  SELF.SetStrategy(?Close, Resize:Reposition, Resize:LockSize) ! Override strategy for ?Close
+  SELF.SetStrategy(?SHEET1, Resize:LockXPos+Resize:LockYPos, Resize:Resize) ! Override strategy for ?SHEET1
+  SELF.SetStrategy(?AudioFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile
+  SELF.SetStrategy(?AudioFile:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile:Prompt
+  SELF.SetStrategy(?AudioDevicesPrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioDevicesPrompt
+  SELF.SetStrategy(?ListAudioDevices, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?ListAudioDevices
+  SELF.SetStrategy(?PlayBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?PlayBtn
+  SELF.SetStrategy(?StopBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?StopBtn
+  SELF.SetStrategy(?OLE, Resize:LockXPos+Resize:LockYPos, Resize:Resize) ! Override strategy for ?OLE
+  SELF.SetStrategy(?LookupFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?LookupFile
+  SELF.SetStrategy(?FileFormat:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?FileFormat:Prompt
+  SELF.SetStrategy(?FileFormat, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?FileFormat
+  SELF.SetStrategy(?AudioPosition, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioPosition
+  SELF.SetStrategy(?Graph, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?Graph
+  SELF.SetStrategy(?Graph:Radio1, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?Graph:Radio1
+  SELF.SetStrategy(?Graph:Radio2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?Graph:Radio2
+  SELF.SetStrategy(?GraphBackGroudColorBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn
+  SELF.SetStrategy(?GraphForeGroudColorBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphForeGroudColorBtn
+  SELF.SetStrategy(?VolumeMeter, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter
+  SELF.SetStrategy(?VolumeMeter:Radio1, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio1
+  SELF.SetStrategy(?VolumeMeter:Radio2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio2
+  SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
+

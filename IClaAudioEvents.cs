@@ -13,6 +13,6 @@ namespace claAudio
     public interface IClaAudioEvents
     {
         [DispId(301)]
-        void SendOutputDevice(string pJson);
+        void SendOutputDevice(string pGuid, string pModule, string pDescription);
     }
 }

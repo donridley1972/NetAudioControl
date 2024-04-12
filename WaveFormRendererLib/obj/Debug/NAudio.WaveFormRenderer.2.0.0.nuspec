@@ -10,7 +10,7 @@
     <description>WaveForm rendering component</description>
     <copyright>© Mark Heath 2021</copyright>
     <tags>C# .NET audio sound</tags>
-    <repository type="git" url="https://github.com/naudio/NAudio.WaveFormRenderer" commit="26208d2850a497c6a29b4780262e81d8c39b2ba8" />
+    <repository type="git" url="https://github.com/naudio/NAudio.WaveFormRenderer" commit="68cec6ea6b098c6bbe5e6e3aed9a2a734f732590" />
     <dependencies>
       <group targetFramework=".NETStandard2.0">
         <dependency id="NAudio.Core" version="2.2.1" exclude="Build,Analyzers" />

@@ -1,20 +1,12 @@
    PROGRAM
 
 
-StringTheory:TemplateVersion equate('3.67')
-jFiles:TemplateVersion equate('3.06')
-Reflection:TemplateVersion equate('1.27')
-ResizeAndSplit:TemplateVersion equate('5.10')
 
    INCLUDE('ABERROR.INC'),ONCE
    INCLUDE('ABUTIL.INC'),ONCE
    INCLUDE('ERRORS.CLW'),ONCE
    INCLUDE('KEYCODES.CLW'),ONCE
    INCLUDE('ABFUZZY.INC'),ONCE
-  include('StringTheory.Inc'),ONCE
-   include('jFiles.inc'),ONCE
-  include('Reflection.Inc'),ONCE
-  include('ResizeAndSplit.Inc'),ONCE
     Include('dwrTrace.inc'),Once
 
    MAP
@@ -30,7 +22,6 @@ Main                   PROCEDURE   !
    END
    INCLUDE('OCXEVENT.CLW')
 
-  include('StringTheory.Inc'),ONCE
 AudioDevices         QUEUE,PRE(),NAME('AudioDevices')
 DevideGUID             STRING(255),NAME('DevideGUID')
 ModuleName             STRING(255),NAME('ModuleName')
