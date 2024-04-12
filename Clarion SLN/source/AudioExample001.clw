@@ -33,6 +33,7 @@ Graph                LONG                                  !
 VolumeMeter          LONG                                  ! 
 FileFormat           STRING(50)                            ! 
 AudioPosition        STRING(50)                            ! 
+LastDeviceGuid       STRING(50)                            ! 
 MyTrace         dwrTrace
 !json            JSONClass
 !st              StringTheory
@@ -44,7 +45,7 @@ Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RE
                            ENTRY(@s255),AT(45,18,290,10),USE(AudioFile)
                            PROMPT('Audio File:'),AT(9,19,33,10),USE(?AudioFile:Prompt),TRN
                            PROMPT('Audio Devices:'),AT(9,33,49,10),USE(?AudioDevicesPrompt),TRN
-                           LIST,AT(61,33,134,10),USE(?ListAudioDevices),DROP(10),FORMAT('1020L(2)M@s255@#3#'),FROM(AudioDevices)
+                           LIST,AT(61,33,134,10),USE(LastDeviceGuid),DROP(10),FORMAT('1020L(2)M@s255@#3#'),FROM(AudioDevices)
                            BUTTON('Play'),AT(9,46,32,14),USE(?PlayBtn)
                            BUTTON('Stop'),AT(44,46),USE(?StopBtn)
                            OLE,AT(9,63,450,103),USE(?OLE)
@@ -109,6 +110,7 @@ ReturnValue          BYTE,AUTO
   SELF.Errors &= GlobalErrors                              ! Set this windows ErrorManager to the global ErrorManager
   ! Restore preserved local variables from non-volatile store
   AudioFile = INIMgr.TryFetch('Main_PreservedVars','AudioFile')
+  LastDeviceGuid = INIMgr.TryFetch('Main_PreservedVars','LastDeviceGuid')
   CLEAR(GlobalRequest)                                     ! Clear GlobalRequest after storing locally
   CLEAR(GlobalResponse)
   SELF.AddItem(Toolbar)
@@ -145,6 +147,14 @@ ReturnValue          BYTE,AUTO
   !    json.start()
   !    json.SetTagCase(jf:CaseAsIs)
   !    json.Load(AudioDevices,st)
+    If AudioFile  
+        ?OLE{'LoadFile(' & AudioFile & ')'}
+    End
+    If LastDeviceGuid
+        AudioDevices.DevideGUID = LastDeviceGuid
+        Get(AudioDevices,AudioDevices.DevideGUID)
+        ?OLE{'SetDeviceGuid(' & Clip(AudioDevices.DevideGUID) & ')'}
+    End
   RETURN ReturnValue
 
 
@@ -160,6 +170,7 @@ ReturnValue          BYTE,AUTO
   END
   ! Save preserved local variables in non-volatile store
   INIMgr.Update('Main_PreservedVars','AudioFile',AudioFile)
+  INIMgr.Update('Main_PreservedVars','LastDeviceGuid',LastDeviceGuid)
   GlobalErrors.SetProcedureName
   RETURN ReturnValue
 
@@ -178,9 +189,10 @@ Looped BYTE
     END
   ReturnValue = PARENT.TakeAccepted()
     CASE ACCEPTED()
-    OF ?ListAudioDevices
-      Get(AudioDevices,Choice(?ListAudioDevices)) 
-      ?OLE{'SetDeviceGuid(' & Clip(AudioDevices.DevideGUID) & ')'}     
+    OF ?LastDeviceGuid
+      Get(AudioDevices,Choice(?LastDeviceGuid)) 
+      ?OLE{'SetDeviceGuid(' & Clip(AudioDevices.DevideGUID) & ')'}  
+      !LastDeviceGuid = AudioDevices.DevideGUID   
     OF ?PlayBtn
       ThisWindow.Update()
       ?OLE{'Play()'}    
@@ -282,7 +294,6 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?AudioFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile
   SELF.SetStrategy(?AudioFile:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile:Prompt
   SELF.SetStrategy(?AudioDevicesPrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioDevicesPrompt
-  SELF.SetStrategy(?ListAudioDevices, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?ListAudioDevices
   SELF.SetStrategy(?PlayBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?PlayBtn
   SELF.SetStrategy(?StopBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?StopBtn
   SELF.SetStrategy(?OLE, Resize:LockXPos+Resize:LockYPos, Resize:Resize) ! Override strategy for ?OLE
