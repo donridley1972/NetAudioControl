@@ -6,15 +6,4 @@ Play and visualize wav and mp3 audio files.
 
 Colors can be set at runtime.
 
-Requires:
-
-Capesoft jFiles
-
-
-Capesoft StringTheory
-
-
-Capesoft Reflection
-
-
-Capesoft ResizeAndSplit
+No 3rd party products required.
