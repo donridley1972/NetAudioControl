@@ -9,6 +9,12 @@ Colors can be set at runtime.
 Requires:
 
 Capesoft jFiles
+
+
 Capesoft StringTheory
+
+
 Capesoft Reflection
+
+
 Capesoft ResizeAndSplit
