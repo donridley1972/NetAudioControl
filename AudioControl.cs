@@ -15,6 +15,9 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using NAudio.Wave.SampleProviders;
 using NAudio.Gui;
+using System.Linq.Expressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Runtime.Remoting.Messaging;
 //using WaveFormRenderer;
 
 namespace claAudio
@@ -32,6 +35,7 @@ namespace claAudio
         private Action<float> setVolumeDelegate;
         private string fileName;
         private string imageFile;
+        private string currentPosition;
         private Guid deviceGuid;
         private readonly NAudio.WaveFormRenderer.WaveFormRenderer waveFormRenderer;
         private WaveFormRendererSettings standardSettings;
@@ -112,7 +116,8 @@ namespace claAudio
         public void Play() {
             if (deviceGuid.ToString() is null) return;
 
-            //standardSettings.TopPeakPen.Color = Color.Blue;
+            //AudioControl.SetCountDownTime(1000, true);
+            //AudioControl.
 
             if (outputDevice == null)
             {
@@ -264,6 +269,8 @@ namespace claAudio
             // we know it is stereo
             volumeMeter1.Amplitude = e.MaxSampleValues[0];
             volumeMeter2.Amplitude = e.MaxSampleValues[1];
+
+            UpdatePosition();
         }
 
         private void CloseWaveOut()
@@ -290,7 +297,7 @@ namespace claAudio
             }
         }
 
-        public void GetOutputDevices()
+        public string GetOutputDevices()
         {
             Trace.WriteLine("GetOutputDevices");
 
@@ -303,9 +310,10 @@ namespace claAudio
                 //Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.Description)));
             }
 
-            string jsonReturn = JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
+            //string jsonReturn = JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
             //Trace.WriteLine(jsonReturn);
-            SendOutputDevice(jsonReturn);
+            //SendOutputDevice(jsonReturn);
+            return JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
         }
 
         public void SetDeviceGuid(string pGuid)
@@ -361,6 +369,69 @@ namespace claAudio
         private void AudioControl_SizeChanged(object sender, EventArgs e)
         {
             Trace.WriteLine("AudioControl_SizeChanged");
+        }
+
+        public void SetWaveGraphBackGroundColor(int pRed,int pGreen,int pBlue,int pControl) {
+            Trace.WriteLine("SetWaveGraphBackGroundColor-pRed[" + pRed + "]pGreen[" + pGreen + "]pBlue[" + pBlue + "]pControl[" + pControl + "]");
+            switch (pControl) { 
+            
+                case 1:
+                    waveformPainter1.BackColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+                case 2:
+                    waveformPainter2.BackColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+            }
+        }
+
+        public void SetWaveGraphForeGroundColor(int pRed, int pGreen, int pBlue, int pControl)
+        {
+
+            switch (pControl)
+            {
+
+                case 1:
+                    waveformPainter1.ForeColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+                case 2:
+                    waveformPainter2.ForeColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+            }
+        }
+
+        public void SetVolumeMeterForeGroundColor(int pRed, int pGreen, int pBlue, int pControl)
+        {
+
+            switch (pControl)
+            {
+                
+                case 1:
+                    volumeMeter1.ForeColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+                case 2:
+                    volumeMeter2.ForeColor = Color.FromArgb(pRed, pGreen, pBlue); break;
+            }
+        }
+
+        public string GetFileFormat() {
+
+            Trace.WriteLine("GetFileFormat " + wavePlayer.OutputWaveFormat.ToString());
+            return wavePlayer.OutputWaveFormat.ToString();
+            //return $"{wavePlayer.OutputWaveFormat}";
+        }
+
+        private void OnTimerTick(object sender, EventArgs e)
+        {
+            if (audioFileReader != null)
+            {
+                UpdatePosition();
+            }
+        }
+
+        public void UpdatePosition()
+        {
+            currentPosition = string.Format("{0}/{1}", audioFileReader.CurrentTime, audioFileReader.TotalTime);
+            //labelPosition.Text = string.Format("{0}/{1}", audioFileReader.CurrentTime, audioFileReader.TotalTime);
+            //trackBar1.Value = Math.Min((int)((trackBar1.Maximum * reader.Position) / reader.Length), trackBar1.Maximum);
+        }
+
+        public string GetPosition() { 
+            return currentPosition;
         }
     }
 }

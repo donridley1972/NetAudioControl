@@ -29,3 +29,4 @@ C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\x86\Debug\netstandard
 C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\x86\Debug\netstandard2.0\WaveFormRendererLib.csproj.CoreCompileInputs.cache
 C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\x86\Debug\netstandard2.0\NAudio.WaveFormRenderer.dll
 C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\x86\Debug\netstandard2.0\NAudio.WaveFormRenderer.pdb
+C:\Users\Don\source\repos\claAudio\WaveFormRendererLib\obj\x86\Debug\netstandard2.0\WaveFormRendererLib.sourcelink.json
