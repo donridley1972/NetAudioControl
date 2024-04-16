@@ -24,11 +24,44 @@
   #ENDIF
 #ENDAT
 #!-----------------------------------------------------------------------------------
+#AT(%CustomGlobalDeclarations),where(%NoDwrNetAudioControl=0)
+#PROJECT('None(claAudio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Asio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Core.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Midi.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Wasapi.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WaveFormRenderer.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WinForms.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WinMM.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(Newtonsoft.Json.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
+#ENDAT
+#!
+#!-----------------------------------------------------------------------------------
 #AT(%AfterGlobalIncludes)
   Include('dwrAudioControl.inc'),Once
 #ENDAT
 #!-----------------------------------------------------------------------------------
 #AT(%GlobalData)
+#ENDAT
+#!---------------------------------------------------
+#AT(%ShipList)
+  #IF(%ApplicationLocalLibrary)
+  #ELSE
+    #IF(%Target32)
+___     claAudio.dll
+___     NAudio.Asio.dll
+___     NAudio.Core.dll
+___     NAudio.dll
+___     NAudio.Midi.dll
+___     NAudio.Wasapi.dll
+___     NAudio.WaveFormRenderer.dll
+___     NAudio.WinForms.dll
+___     NAudio.WinMM.dll
+___     Newtonsoft.Json.dll
+    #ENDIF
+  #ENDIF
 #ENDAT
 #!-----------------------------------------------------------------------------------
 #AtEnd
