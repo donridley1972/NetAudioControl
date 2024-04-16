@@ -7,6 +7,7 @@
    INCLUDE('ERRORS.CLW'),ONCE
    INCLUDE('KEYCODES.CLW'),ONCE
    INCLUDE('ABFUZZY.INC'),ONCE
+  Include('dwrAudioControl.inc'),Once
     Include('dwrTrace.inc'),Once
 
    MAP
@@ -22,16 +23,13 @@ Main                   PROCEDURE   !
    END
    INCLUDE('OCXEVENT.CLW')
 
-AudioDevices         QUEUE,PRE(),NAME('AudioDevices')
-DevideGUID             STRING(255),NAME('DevideGUID')
-ModuleName             STRING(255),NAME('ModuleName')
-Description            STRING(255),NAME('Description')
-                     END
 SilentRunning        BYTE(0)                               ! Set true when application is running in 'silent mode'
 
 !region File Declaration
 !endregion
 
+!AudioDevices    &AudioDevicesQType
+AudioDevices    &AudioDevicesQType
 
 FuzzyMatcher         FuzzyClass                            ! Global fuzzy matcher
 GlobalErrorStatus    ErrorStatusClass,THREAD
@@ -54,6 +52,8 @@ Destruct               PROCEDURE
   FuzzyMatcher.SetOption(MatchOption:WordOnly, 0)          ! Configure 'word only' matching
   INIMgr.Init('.\AudioExample.INI', NVD_INI)               ! Configure INIManager to use INI file
   DctInit()
+  !AudioDevices &= NEW AudioDevicesQType
+  AudioDevices &= NEW AudioDevicesQType
   Main
   INIMgr.Update
   INIMgr.Kill                                              ! Destroy INI manager

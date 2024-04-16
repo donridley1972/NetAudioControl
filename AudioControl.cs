@@ -410,7 +410,7 @@ namespace claAudio
 
         public string GetFileFormat() {
 
-            Trace.WriteLine("GetFileFormat " + wavePlayer.OutputWaveFormat.ToString());
+            Trace.WriteLine("claAudio - GetFileFormat " + wavePlayer.OutputWaveFormat.ToString());
             return wavePlayer.OutputWaveFormat.ToString();
             //return $"{wavePlayer.OutputWaveFormat}";
         }
