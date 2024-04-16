@@ -32,3 +32,13 @@ ___    ClaOLE.DLL - Clarion OLE Support Library
      NOTE: It is possible that OLE and OCX files might not be in this list. Please
            take care to include all files used.
 
+  ___     claAudio.dll
+  ___     NAudio.Asio.dll
+  ___     NAudio.Core.dll
+  ___     NAudio.dll
+  ___     NAudio.Midi.dll
+  ___     NAudio.Wasapi.dll
+  ___     NAudio.WaveFormRenderer.dll
+  ___     NAudio.WinForms.dll
+  ___     NAudio.WinMM.dll
+  ___     Newtonsoft.Json.dll
