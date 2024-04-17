@@ -8,4 +8,8 @@ Play and visualize wav and mp3 audio files.
 
 Colors can be set at runtime.
 
+Audio volume can be set at runtime.
+
+Position in audio track can be changed at runtime.
+
 No 3rd party products required.
