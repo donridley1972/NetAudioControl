@@ -25,19 +25,19 @@
   #ENDIF
 #ENDAT
 #!-----------------------------------------------------------------------------------
-#AT(%CustomGlobalDeclarations),where(%NoDwrNetAudioControl=0)
-#PROJECT('None(claAudio.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.Asio.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.Core.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.Midi.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.Wasapi.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.WaveFormRenderer.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.WinForms.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(NAudio.WinMM.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(Newtonsoft.Json.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
-#ENDAT
+#!#AT(%CustomGlobalDeclarations),where(%NoDwrNetAudioControl=0)
+#!#PROJECT('None(claAudio.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.Asio.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.Core.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.Midi.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.Wasapi.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.WaveFormRenderer.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.WinForms.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(NAudio.WinMM.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(Newtonsoft.Json.dll), CopyToOutputDirectory=Always')
+#!#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
+#!#ENDAT
 #!
 #!-----------------------------------------------------------------------------------
 #AT(%AfterGlobalIncludes)
@@ -131,7 +131,7 @@ ___     Newtonsoft.Json.dll
   #SET(%OLEShortName,SUB(%OLEControl,2,LEN(%OLEControl)-1))
 #ENDAT
 #!---------------------------------------------------
-#AT(%CustomGlobalDeclarations)
+#AT(%CustomGlobalDeclarations),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0)
   #IF(%GenerateEventCallback) #! OR %GenerateChangeCallback OR %GenerateEditCallback)
     #IF(%IncludeOCXMap)
       #ADD(%CustomGlobalMapIncludes,'OCX.CLW')
@@ -140,6 +140,21 @@ ___     Newtonsoft.Json.dll
   #IF(%IncludeOCXEvent)
     #ADD(%CustomGlobalDeclarationIncludes,'OCXEVENT.CLW')
   #ENDIF
+#IF(%dwrAudioCopyToOutput=1)
+#PROJECT('None(claAudio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Asio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Core.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Midi.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.Wasapi.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WaveFormRenderer.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WinForms.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(NAudio.WinMM.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(Newtonsoft.Json.dll), CopyToOutputDirectory=Always')
+#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
+#ENDIF
+
+
 #ENDAT
 #!--------------------------------------------------------------------
 #AT(%GlobalData),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(4000)
@@ -280,18 +295,22 @@ DISPLAY
 #ENDAT
 #!------------------------------------------------------------------------------
 #AT(%EventHandlerCode,%ActiveTemplateInstance),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(5000)
-  Case OLEEvent 
-  Of 301
-    If OcxGetParamCount(ref)
-        AudioDevices.DevideGUID = OcxGetParam(ref, 1)
-        Get(AudioDevices,AudioDevices.DevideGUID)
-        If Errorcode()
-          AudioDevices.ModuleName = OcxGetParam(ref, 2)
-          AudioDevices.Description = OcxGetParam(ref, 3)
-          Add(AudioDevices)
-        End
-    End
-  End 
+  If OcxGetParamCount(ref)
+    Case OLEEvent 
+    Of 301
+#EMBED(%dwrAudoOLEEventHandlerEvent301,'AudoControl OLE EventHandler - Event 301')  #!,TREE('DwrTreeControl' & %ActiveTemplateInstance & '|TreeControl Primary View Next'),%dwrPrimaryTreeFiles
+      AudioDevices.DevideGUID = OcxGetParam(ref, 1)
+      Get(AudioDevices,AudioDevices.DevideGUID)
+      If Errorcode()
+        AudioDevices.ModuleName = OcxGetParam(ref, 2)
+        AudioDevices.Description = OcxGetParam(ref, 3)
+        Add(AudioDevices)
+      End
+    Of 302
+#EMBED(%dwrAudoOLEEventHandlerEvent302,'AudoControl OLE EventHandler - Event 302')
+    #!PROP:sliderpos
+    End 
+  End
 #ENDAT
 #!------------------------------------------------------------------------------
 #AT(%ControlEventHandling,'?LastDeviceGuid','Accepted'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(5000)
@@ -315,6 +334,7 @@ End
 #!---------------------------------------------------
 #AT(%WindowManagerMethodCodeSection,'Kill','(),BYTE'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(2300)
 Dispose(AudioDevices)
+%rasObjectName.Kill()
 #ENDAT
 #! --------------------------------------------------------------------------
 #AT(%AfterGeneratedApplication)
@@ -322,6 +342,7 @@ Dispose(AudioDevices)
 #IF(%GenerateXPManifest=1)
     #IF(%dwrAudioAddDependency = '1')
         #CALL(%dwrAddDependency, %dwrAudioAssemblyName, %dwrAudioAssemblyVersion, %dwrAudioLinkManifest)
+        #CALL(%dwrCreateDLLManifest)
     #ENDIF
 #ENDIF
 #!#ENDIF
@@ -401,3 +422,21 @@ Dispose(AudioDevices)
       <assemblyIdentity name="%pAssemblyName" version="%pAssemblyVersion" processorArchitecture="x86"/>
     </dependentAssembly>
   </dependency>
+#! --------------------------------------------------------------------------
+#GROUP(%dwrCreateDLLManifest)
+  #DECLARE(%pDllManifestFile)
+  #SET(%pDllManifestFile, 'claAudio.manifest')
+  #IF(NOT FILEEXISTS(%pDllManifestFile))
+    #CREATE(%pDllManifestFile)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity name="claAudio" version="1.0.0.0" processorArchitecture="x86"></assemblyIdentity>
+<clrClass clsid="{E97135B1-F369-36DD-A6F0-E9925699987A}" progid="ClaAudio" threadingModel="Both" name="claAudio.AudioControl" runtimeVersion="v4.0.30319"></clrClass>
+<clrClass clsid="{E4FA5365-4B55-38FD-9632-269C8254C5AE}" progid="claAudio.AudioControl+OutputDevicesData" threadingModel="Both" name="claAudio.AudioControl+OutputDevicesData" runtimeVersion="v4.0.30319"></clrClass>
+<clrClass clsid="{A9F970ED-01DD-38BA-A9C5-A3680DF14F11}" progid="claAudio.AudioControl+OnSendOutputDevice" threadingModel="Both" name="claAudio.AudioControl+OnSendOutputDevice" runtimeVersion="v4.0.30319"></clrClass>
+<file name="claAudio.dll" hashalg="SHA1"></file>
+</assembly>
+    #CLOSE(%pDllManifestFile)
+  #ENDIF
+#PROJECT(%pDllManifestFile)
+

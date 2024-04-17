@@ -1,4 +1,6 @@
 
+Audio:UpdateSliderEvent     Equate(EVENT:User+9990)
+
 ColorGrpType            GROUP,Type
 Red                     BYTE
 Green                   BYTE
@@ -34,8 +36,10 @@ GetFileFormat                   Procedure(),String,Proc,Virtual
 GetIsPlaying                    Procedure(),Byte,Virtual,Proc
 GetOutputDevices                Procedure(),Proc,Virtual
 GetPosition                     Procedure(),String,Proc,Virtual
+GetSliderPos                    Procedure(),Long,Proc,Virtual
 LoadFile                        Procedure(string pAudioFile),Proc,Virtual
 Play                            Procedure(),Proc,Virtual
+SetAudioPosition                Procedure(long pSliderPos),Proc,Virtual
 SetDeviceGuid                   Procedure(string pDeviceGuid),Proc,Virtual
 SetIsPlaying                    Procedure(byte pVal),Virtual,Proc
 SetWaveGraphBackGroundColor     Procedure(long pColor,long pGraphNo),Proc,Virtual

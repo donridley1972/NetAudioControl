@@ -227,7 +227,7 @@ namespace claAudio
             //this.waveformPainter1 = new NAudio.Gui.WaveformPainter();
             //this.waveformPainter2 = new NAudio.Gui.WaveformPainter();
 
-            //SetSliderPos(100);
+            SetSliderPos(100);
             //if (audioFileReader != null)
             //{
             //    audioFileReader.Position = 0;
@@ -275,16 +275,9 @@ namespace claAudio
             // we know it is stereo
             TimeSpan currentTime = (wavePlayer.PlaybackState == PlaybackState.Stopped) ? TimeSpan.Zero : audioFileReader.CurrentTime;
             //Trace.WriteLine(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
-            //sliderPos = Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds));
-
             SetSliderPos(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
-
-            //SliderUpdate(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
-
             waveformPainter1.AddMax(e.MaxSampleValues[0]);
             waveformPainter2.AddMax(e.MaxSampleValues[1]);
-
-
         }
 
         void OnPostVolumeMeter(object sender, StreamVolumeEventArgs e)
@@ -379,7 +372,6 @@ namespace claAudio
                     control.Dispose();
                 }
             }
-            //AudioControl
         }
 
         private void AudioControl_Resize(object sender, EventArgs e)

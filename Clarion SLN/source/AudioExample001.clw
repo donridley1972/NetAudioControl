@@ -33,7 +33,6 @@ SliderPos            LONG                                  !
 SliderSelected       BYTE                                  ! 
 LastDeviceGuid       STRING(50)
 AudioFile            CSTRING(255)
-MyTrace         dwrTrace
 Window               WINDOW('Audio Example'),AT(,,463,230),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
   SYSTEM,IMM
                        BUTTON('Close'),AT(427,209),USE(?Close)
@@ -52,7 +51,7 @@ Window               WINDOW('Audio Example'),AT(,,463,230),FONT('Segoe UI',9),RE
                              STRING(@s50),AT(320,29,132,10),USE(FileFormat),LEFT(2),TRN
                              STRING(@s50),AT(46,62,177),USE(AudioPosition),LEFT(2),TRN
                            END
-                           SLIDER,AT(8,163,451),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW
+                           SLIDER,AT(8,163,451,17),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW
                            STRING(''),AT(8,183,451),USE(?SliderPcntStr),CENTER,TRN
                          END
                          TAB('Options'),USE(?TAB2)
@@ -76,8 +75,7 @@ Init                   PROCEDURE(),BYTE,PROC,DERIVED
 Kill                   PROCEDURE(),BYTE,PROC,DERIVED
 TakeAccepted           PROCEDURE(),BYTE,PROC,DERIVED
 TakeEvent              PROCEDURE(),BYTE,PROC,DERIVED
-TakeFieldEvent         PROCEDURE(),BYTE,PROC,DERIVED
-TakeSelected           PROCEDURE(),BYTE,PROC,DERIVED
+TakeNewSelection       PROCEDURE(),BYTE,PROC,DERIVED
                      END
 
 Toolbar              ToolbarClass
@@ -234,18 +232,16 @@ Looped BYTE
       Looped = 1
     END
     Case EVENT()
-    Of Audio:UpdateSliderEvent
-        !?SLIDER1{PROP:SliderPos} = Glo:SliderPos
     Of EVENT:Timer
+        If SliderPos = 100
+            myAudio2.SetIsPlaying(False)
+            ?PlayBtn{PROP:Text} = 'Play'
+        End
         SliderPos = myAudio2.GetSliderPos()
-        MyTrace.Trace('SliderPos[' & SliderPos & ']<9>Field[' & FIELD() & ']')
         !MyTrace.Trace('GetSliderPos[' & myAudio2.GetSliderPos() & ']')
         If Not SliderSelected
-            MyTrace.Trace('Slider NOT Selected')
             ?SLIDER1{PROP:SliderPos} = SliderPos !myAudio2.GetSliderPos()  !Glo:SliderPos
             ?SliderPcntStr{PROP:Text} = SliderPos & ' %'
-        ELSE
-            MyTrace.Trace('Slider Selected')
         End
         AudioPosition = myAudio2.GetPosition()
     End  
@@ -256,45 +252,19 @@ Looped BYTE
   RETURN ReturnValue
 
 
-ThisWindow.TakeFieldEvent PROCEDURE
+ThisWindow.TakeNewSelection PROCEDURE
 
 ReturnValue          BYTE,AUTO
 
 Looped BYTE
   CODE
-  LOOP                                                     ! This method receives all field specific events
+  LOOP                                                     ! This method receives all NewSelection events
     IF Looped
       RETURN Level:Notify
     ELSE
       Looped = 1
     END
-  ReturnValue = PARENT.TakeFieldEvent()
-  CASE FIELD()
-  OF ?SLIDER1
-    CASE EVENT()
-    OF EVENT:Selecting
-      !  SliderSelected = True      
-    END
-  END
-    RETURN ReturnValue
-  END
-  ReturnValue = Level:Fatal
-  RETURN ReturnValue
-
-
-ThisWindow.TakeSelected PROCEDURE
-
-ReturnValue          BYTE,AUTO
-
-Looped BYTE
-  CODE
-  LOOP                                                     ! This method receives all Selected events
-    IF Looped
-      RETURN Level:Notify
-    ELSE
-      Looped = 1
-    END
-  ReturnValue = PARENT.TakeSelected()
+  ReturnValue = PARENT.TakeNewSelection()
     CASE FIELD()
     OF ?SLIDER1
       SliderSelected = True      
@@ -326,9 +296,7 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?SliderPcntStr, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SliderPcntStr
 
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
-!OleTrace        dwrTrace
   CODE
-    !OleTrace.Trace('MainOLEEventHandler<9>OLEEvent[' & OLEEvent & ']')
   If OcxGetParamCount(ref)
     Case OLEEvent 
     Of 301
@@ -340,8 +308,7 @@ MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
         Add(AudioDevices)
       End
     Of 302
-    !Glo:SliderPos = OcxGetParam(ref, 1)
-    !POST(Audio:UpdateSliderEvent)   
+ 
     End 
   End
   RETURN(True)

@@ -25,7 +25,7 @@ dwrAudioControl.Init                            PROCEDURE()
 
 dwrAudioControl.Kill                            PROCEDURE()
     CODE
-
+    self.OLEControl{'Kill()'}
     RETURN
 
 dwrAudioControl.CreateOLE                       Procedure(long pOLEControl) !,Proc,Virtual
@@ -49,6 +49,10 @@ dwrAudioControl.GetPosition                     Procedure() !,String,Proc,Virtua
     CODE
     return self.OLEControl{'GetPosition()'}
 
+dwrAudioControl.GetSliderPos                    Procedure() !,Long,Proc,Virtual
+    CODE
+    return self.OLEControl{'GetSliderPos()'}
+
 dwrAudioControl.LoadFile                        Procedure(string pAudioFile)    !,Proc,Virtual
     CODE
     self.AudioFile = pAudioFile
@@ -58,6 +62,10 @@ dwrAudioControl.Play                            Procedure() !,Proc,Virtual
     CODE
     self.SetIsPlaying(True)
     self.OLEControl{'Play()'}
+
+dwrAudioControl.SetAudioPosition                Procedure(long pSliderPos)  !,Proc,Virtual
+    CODE
+    self.OLEControl{'SetAudioPosition(' & pSliderPos & ')'}
 
 dwrAudioControl.SetDeviceGuid                   Procedure(string pDeviceGuid)   !,Proc,Virtual
     code
