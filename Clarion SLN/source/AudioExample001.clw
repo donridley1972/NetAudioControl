@@ -64,6 +64,7 @@ Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RE
                            BUTTON('Volume Meter Color'),AT(271,39,91,14),USE(?GraphBackGroudColorBtn:2)
                          END
                        END
+                       BUTTON('Get Audio Devices'),AT(3,173),USE(?GetAudioDevicesBtn)
                      END
 
 ThisWindow           CLASS(WindowManager)
@@ -108,9 +109,9 @@ ReturnValue          BYTE,AUTO
   SELF.VCRRequest &= VCRRequest
   SELF.Errors &= GlobalErrors                              ! Set this windows ErrorManager to the global ErrorManager
   ! Restore preserved local variables from non-volatile store
+  SELF.AddItem(Toolbar)
   CLEAR(GlobalRequest)                                     ! Clear GlobalRequest after storing locally
   CLEAR(GlobalResponse)
-  SELF.AddItem(Toolbar)
   IF SELF.Request = SelectRecord
      SELF.AddItem(?Close,RequestCancelled)                 ! Add the close control to the window manger
   ELSE
@@ -118,6 +119,7 @@ ReturnValue          BYTE,AUTO
   END
   SELF.Open(Window)                                        ! Open window
   Do DefineListboxStyle
+  !
   myAudio2.CreateOLE(?OLE)
   OCXRegisterEventProc(?OLE,MainOLEEventHandler)
   Resizer.Init(AppStrategy:Spread,Resize:SetMinSize)       ! Controls will spread out as the window gets bigger
@@ -202,6 +204,9 @@ Looped BYTE
       ThisWindow.Update()
       COLORDIALOG('Select Foreground Color',SelectedColor)
       myAudio2.SetVolumeMeterForeGroundColor(SelectedColor,VolumeMeter)
+    OF ?GetAudioDevicesBtn
+      ThisWindow.Update()
+      myAudio2.GetOutputDevices()      
     END
     RETURN ReturnValue
   END
@@ -251,14 +256,19 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
 
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
+OleTrace        dwrTrace
   CODE
+    OleTrace.Trace('MainOLEEventHandler<9>OLEEvent[' & OLEEvent & ']')
   Case OLEEvent 
   Of 301
     If OcxGetParamCount(ref)
         AudioDevices.DevideGUID = OcxGetParam(ref, 1)
+        Get(AudioDevices,AudioDevices.DevideGUID)
+        If Errorcode()
           AudioDevices.ModuleName = OcxGetParam(ref, 2)
           AudioDevices.Description = OcxGetParam(ref, 3)
           Add(AudioDevices)
+        End
     End
   End 
   RETURN(True)

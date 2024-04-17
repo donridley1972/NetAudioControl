@@ -37,8 +37,8 @@ namespace claAudio
         private string imageFile;
         private string currentPosition;
         private Guid deviceGuid;
-        private readonly NAudio.WaveFormRenderer.WaveFormRenderer waveFormRenderer;
-        private WaveFormRendererSettings standardSettings;
+        //private readonly NAudio.WaveFormRenderer.WaveFormRenderer waveFormRenderer;
+        //private WaveFormRendererSettings standardSettings;
 
         public class OutputDevicesData
         {
@@ -297,23 +297,32 @@ namespace claAudio
             }
         }
 
-        public string GetOutputDevices()
+        public void GetOutputDevices()
         {
             Trace.WriteLine("GetOutputDevices");
 
             foreach (var dev in DirectSoundOut.Devices)
             {
-                //Trace.WriteLine($"{dev.Guid} {dev.ModuleName} {dev.Description}");
+                Trace.WriteLine($"{dev.Guid} {dev.ModuleName} {dev.Description}");
                 //comboBoxOutputDevices.Items.Add(dev.Description);
                 outputDevicesItems.Add(new OutputDevicesData { DevideGUID = dev.Guid, ModuleName = dev.ModuleName, Description = dev.Description });
-                SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description);
-                //Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.Description)));
+                //SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description);
+                //Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description)));
+                try
+                {
+                    Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description)));
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e.GetType().Name + " : " + e.Message);
+                    //MessageBox.Show(e.GetType().Name + " : " + e.Message);
+                }
             }
 
             //string jsonReturn = JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
             //Trace.WriteLine(jsonReturn);
             //SendOutputDevice(jsonReturn);
-            return JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
+            //return JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
         }
 
         public void SetDeviceGuid(string pGuid)

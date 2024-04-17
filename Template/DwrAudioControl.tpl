@@ -1,6 +1,7 @@
 #TEMPLATE(dwrNetAudioControl,'.NET Audio Control'),FAMILY('ABC')
 #Include('cape01.tpw')
 #Include('cape02.tpw')
+#INCLUDE('SVFnGrp.TPW')
 #INCLUDE('ABOOP.tpw')
 #!------------------------------------------------------------------------------------------------------------------------
 #Extension(Activate_DwrNetAudioControl,'Activate .NET Audio Control - Version:1.0'),Application
@@ -85,6 +86,11 @@ ___     Newtonsoft.Json.dll
   END
 #Sheet
     #TAB('General')
+        #ENABLE(%ProgramExtension = 'EXE'),CLEAR
+            #PROMPT('Enable Registration-Free Activation ', CHECK),%dwrAudioAddDependency,DEFAULT(1),AT(10)
+            #PROMPT('Link manifest', CHECK),%dwrAudioLinkManifest,DEFAULT(1),AT(10)
+            #PROMPT('Copy DLL to output folder', CHECK),%dwrAudioCopyToOutput,DEFAULT(1),AT(10)
+        #ENDENABLE
           #BOXED('Callback Generation')
             #Prompt('Disable Template',Check),%NoDwrNetAudioControlLocal,At(10)
             #PROMPT('&Event Handler',CHECK),%GenerateEventCallback,default(1),At(10)
@@ -105,6 +111,11 @@ ___     Newtonsoft.Json.dll
       #PROMPT('Declaration Class Embeds',EMBEDBUTTON(%ERSHDeclaration,%ActiveTemplateInstance)),AT(10,,180)
       #PROMPT('Class Embeds',EMBEDBUTTON(%ERSHProcedures,%ActiveTemplateInstance)),AT(10,,180)
       #PROMPT('Lookup Class:',@s20),%dwrLookupClass,DEFAULT('FileLookup' & %ActiveTemplateInstance),at(50,,110,),promptat(10,)
+    #ENDTAB
+    #TAB('Hidden'),WHERE(%False)
+        #PROMPT('Template version:', @s10),%dwrAudioTPLVersion,DEFAULT('1.00')
+        #PROMPT('Assembly name:', @s20), %dwrAudioAssemblyName,DEFAULT('claAudio')
+        #PROMPT('Assembly version:', @s16),%dwrAudioAssemblyVersion,DEFAULT('1.0.0.0')
     #ENDTAB
 #ENDSHEET
 #!---------------------------------------------------
@@ -257,6 +268,10 @@ End
 %dwrLookupClass.SetMask('Audio Files','*.wav;*.mp3')         ! Set the file mask
 #ENDAT
 #! --------------------------------------------------------------------------
+#AT(%WindowManagerMethodCodeSection,'Open','()'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(500)
+#!%rasObjectName.CreateOLE(%OLEControl)
+#ENDAT
+#! --------------------------------------------------------------------------
 #AT(%ControlEventHandling,'?LookupAudioFile','Accepted'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(8500)
 ThisWindow.Update()
 AudioFile = %dwrLookupClass.Ask(1)
@@ -269,12 +284,12 @@ DISPLAY
   Of 301
     If OcxGetParamCount(ref)
         AudioDevices.DevideGUID = OcxGetParam(ref, 1)
-        #!Get(AudioDevices,AudioDevices.DevideGUID)
-        #!If Errorcode()
+        Get(AudioDevices,AudioDevices.DevideGUID)
+        If Errorcode()
           AudioDevices.ModuleName = OcxGetParam(ref, 2)
           AudioDevices.Description = OcxGetParam(ref, 3)
           Add(AudioDevices)
-        #!End
+        End
     End
   End 
 #ENDAT
@@ -301,6 +316,16 @@ End
 #AT(%WindowManagerMethodCodeSection,'Kill','(),BYTE'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),Priority(2300)
 Dispose(AudioDevices)
 #ENDAT
+#! --------------------------------------------------------------------------
+#AT(%AfterGeneratedApplication)
+#!#IF(%CWVersion > 8000)
+#IF(%GenerateXPManifest=1)
+    #IF(%dwrAudioAddDependency = '1')
+        #CALL(%dwrAddDependency, %dwrAudioAssemblyName, %dwrAudioAssemblyVersion, %dwrAudioLinkManifest)
+    #ENDIF
+#ENDIF
+#!#ENDIF
+#ENDAT
 #!------------------------------------------------------------------------------
 #GROUP(%ReadGlobal,%pa,%force)
   #INSERT(%SetFamily)
@@ -311,3 +336,68 @@ Dispose(AudioDevices)
       #EndContext
     #EndFor
   #EndFor
+#! --------------------------------------------------------------------------
+#GROUP(%dwrAddDependency, %pAssemblyName, %pAssemblyVersion, %pLinkManifest),AUTO
+  #DECLARE(%ManifestFile)
+  #SET(%ManifestFile, %ProjectTarget & '.manifest')
+  #IF(NOT FILEEXISTS(%ManifestFile))
+    #! create manifest if not exists
+    #CALL(%dwrCreateManifest, %ManifestFile, %pAssemblyName, %pAssemblyVersion)
+  #ELSE
+    #! insert/update dependency
+    #CALL(%dwrUpdateManifest, %ManifestFile, %pAssemblyName, %pAssemblyVersion)
+  #ENDIF
+  #IF(%pLinkManifest)
+     #PROJECT(%ManifestFile)
+  #ENDIF
+#! --------------------------------------------------------------------------
+#GROUP(%dwrCreateManifest, %pManifestFile, %pAssemblyName, %pAssemblyVersion),AUTO
+  #CREATE(%pManifestFile)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+    version="1.0.0.0"
+    processorArchitecture="X86"
+    name="SoftVelocity.Clarion%CWVersion.Application"
+    type="win32"
+  />
+  <description>%Application</description>
+  #CALL(%dwrInsertDependency, %pAssemblyName, %pAssemblyVersion)
+</assembly>
+  #CLOSE(%pManifestFile)
+#! --------------------------------------------------------------------------
+#GROUP(%dwrUpdateManifest, %pManifestFile, %pAssemblyName, %pAssemblyVersion),AUTO
+  #DECLARE(%FileLine)
+  #DECLARE(%AssemblyFound, LONG)
+  #DECLARE(%TmpFile)
+  #SET(%TmpFile, %ManifestFile &'.$$$')
+  #OPEN(%pManifestFile),READ
+  #CREATE(%TmpFile)
+  #LOOP
+    #READ(%FileLine)
+    #IF(%FileLine = %EOF)
+      #BREAK
+    #ENDIF
+    #IF(INSTRING(' version="',%FileLine,1,1) > 0 AND %AssemblyFound)
+        version="%pAssemblyVersion"
+    #ELSIF(INSTRING(' name="'& %pAssemblyName &'"',%FileLine,1,1) > 0)
+      #SET(%AssemblyFound, %True)
+%FileLine
+    #ELSIF(INSTRING('</assembly>',%FileLine,1,1) > 0 AND NOT %AssemblyFound)
+      #CALL(%dwrInsertDependency, %pAssemblyName, %pAssemblyVersion)
+%FileLine
+    #ELSE  
+%FileLine
+    #ENDIF
+  #ENDLOOP
+  #CLOSE(%pManifestFile),READ
+  #CLOSE(%TmpFile)
+  #REPLACE(%pManifestFile,%TmpFile)
+  #REMOVE(%TmpFile)
+#! --------------------------------------------------------------------------
+#GROUP(%dwrInsertDependency, %pAssemblyName, %pAssemblyVersion),AUTO
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity name="%pAssemblyName" version="%pAssemblyVersion" processorArchitecture="x86"/>
+    </dependentAssembly>
+  </dependency>

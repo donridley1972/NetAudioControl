@@ -26,11 +26,6 @@
       />
     </dependentAssembly>
   </dependency>
-  <dependency> 
-    <dependentAssembly> 
-       <assemblyIdentity name="ClaAudio" version="1.0.0.0" processorArchitecture="x86"/> 
-    </dependentAssembly> 
-  </dependency> 
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
       <!--The ID below indicates application support for Windows Vista -->
@@ -50,4 +45,9 @@
       <dpiAware>true</dpiAware>
     </asmv3:windowsSettings>
   </asmv3:application>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity name="claAudio" version="1.0.0.0" processorArchitecture="x86"/>
+    </dependentAssembly>
+  </dependency>
 </assembly>

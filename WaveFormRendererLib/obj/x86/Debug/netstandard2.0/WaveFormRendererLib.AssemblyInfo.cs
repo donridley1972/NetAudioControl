@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCopyrightAttribute("© Mark Heath 2021")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("WaveForm rendering component")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("2.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+7aee9939b9f0a96b16f898f5dca48273042ece84")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+4efaee595246079f84388eb38f547ad7b959789f")]
 [assembly: System.Reflection.AssemblyProductAttribute("NAudio.WaveFormRenderer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NAudio.WaveFormRenderer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("2.0.0.0")]
