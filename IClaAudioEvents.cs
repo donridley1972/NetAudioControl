@@ -14,5 +14,8 @@ namespace claAudio
     {
         [DispId(301)]
         void SendOutputDevice(string pGuid, string pModule, string pDescription);
+
+        [DispId(302)]
+        void SliderUpdate(int pTick);
     }
 }

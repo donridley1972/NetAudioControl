@@ -29,12 +29,15 @@ Graph                LONG                                  !
 VolumeMeter          LONG                                  ! 
 FileFormat           STRING(50)                            ! 
 AudioPosition        STRING(50)                            ! 
+SliderPos            LONG                                  ! 
+SliderSelected       BYTE                                  ! 
 LastDeviceGuid       STRING(50)
 AudioFile            CSTRING(255)
-Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
+MyTrace         dwrTrace
+Window               WINDOW('Audio Example'),AT(,,463,230),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
   SYSTEM,IMM
-                       BUTTON('Close'),AT(427,174),USE(?Close)
-                       SHEET,AT(2,2,461,169),USE(?SHEET1)
+                       BUTTON('Close'),AT(427,209),USE(?Close)
+                       SHEET,AT(2,2,461,198),USE(?SHEET1)
                          TAB('General'),USE(?TAB1)
                            GROUP,AT(8,19,451,141),USE(?SettingsSheet),BOXED
                              PROMPT('Audio File:'),AT(11,29),USE(?AudioFile:Prompt),TRN
@@ -49,6 +52,8 @@ Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RE
                              STRING(@s50),AT(320,29,132,10),USE(FileFormat),LEFT(2),TRN
                              STRING(@s50),AT(46,62,177),USE(AudioPosition),LEFT(2),TRN
                            END
+                           SLIDER,AT(8,163,451),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW
+                           STRING(''),AT(8,183,451),USE(?SliderPcntStr),CENTER,TRN
                          END
                          TAB('Options'),USE(?TAB2)
                            OPTION('Graph:'),AT(9,21,177,48),USE(Graph),BOXED,TRN
@@ -64,7 +69,6 @@ Window               WINDOW('Audio Example'),AT(,,463,195),FONT('Segoe UI',9),RE
                            BUTTON('Volume Meter Color'),AT(271,39,91,14),USE(?GraphBackGroudColorBtn:2)
                          END
                        END
-                       BUTTON('Get Audio Devices'),AT(3,173),USE(?GetAudioDevicesBtn)
                      END
 
 ThisWindow           CLASS(WindowManager)
@@ -72,6 +76,8 @@ Init                   PROCEDURE(),BYTE,PROC,DERIVED
 Kill                   PROCEDURE(),BYTE,PROC,DERIVED
 TakeAccepted           PROCEDURE(),BYTE,PROC,DERIVED
 TakeEvent              PROCEDURE(),BYTE,PROC,DERIVED
+TakeFieldEvent         PROCEDURE(),BYTE,PROC,DERIVED
+TakeSelected           PROCEDURE(),BYTE,PROC,DERIVED
                      END
 
 Toolbar              ToolbarClass
@@ -109,9 +115,9 @@ ReturnValue          BYTE,AUTO
   SELF.VCRRequest &= VCRRequest
   SELF.Errors &= GlobalErrors                              ! Set this windows ErrorManager to the global ErrorManager
   ! Restore preserved local variables from non-volatile store
-  SELF.AddItem(Toolbar)
   CLEAR(GlobalRequest)                                     ! Clear GlobalRequest after storing locally
   CLEAR(GlobalResponse)
+  SELF.AddItem(Toolbar)
   IF SELF.Request = SelectRecord
      SELF.AddItem(?Close,RequestCancelled)                 ! Add the close control to the window manger
   ELSE
@@ -148,6 +154,7 @@ ReturnValue          BYTE,AUTO
 
   CODE
   Dispose(AudioDevices)
+  myAudio2.Kill()
   ReturnValue = PARENT.Kill()
   IF ReturnValue THEN RETURN ReturnValue.
   IF SELF.Opened
@@ -192,6 +199,9 @@ Looped BYTE
         myAudio2.Stop()
       End
       FileFormat = myAudio2.GetFileFormat()
+    OF ?SLIDER1
+      myAudio2.SetAudioPosition(?SLIDER1{PROP:SliderPos})
+      SliderSelected = False
     OF ?GraphBackGroudColorBtn
       ThisWindow.Update()
       COLORDIALOG('Select Background Color',SelectedColor)
@@ -204,9 +214,6 @@ Looped BYTE
       ThisWindow.Update()
       COLORDIALOG('Select Foreground Color',SelectedColor)
       myAudio2.SetVolumeMeterForeGroundColor(SelectedColor,VolumeMeter)
-    OF ?GetAudioDevicesBtn
-      ThisWindow.Update()
-      myAudio2.GetOutputDevices()      
     END
     RETURN ReturnValue
   END
@@ -227,10 +234,71 @@ Looped BYTE
       Looped = 1
     END
     Case EVENT()
+    Of Audio:UpdateSliderEvent
+        !?SLIDER1{PROP:SliderPos} = Glo:SliderPos
     Of EVENT:Timer
+        SliderPos = myAudio2.GetSliderPos()
+        MyTrace.Trace('SliderPos[' & SliderPos & ']<9>Field[' & FIELD() & ']')
+        !MyTrace.Trace('GetSliderPos[' & myAudio2.GetSliderPos() & ']')
+        If Not SliderSelected
+            MyTrace.Trace('Slider NOT Selected')
+            ?SLIDER1{PROP:SliderPos} = SliderPos !myAudio2.GetSliderPos()  !Glo:SliderPos
+            ?SliderPcntStr{PROP:Text} = SliderPos & ' %'
+        ELSE
+            MyTrace.Trace('Slider Selected')
+        End
         AudioPosition = myAudio2.GetPosition()
     End  
   ReturnValue = PARENT.TakeEvent()
+    RETURN ReturnValue
+  END
+  ReturnValue = Level:Fatal
+  RETURN ReturnValue
+
+
+ThisWindow.TakeFieldEvent PROCEDURE
+
+ReturnValue          BYTE,AUTO
+
+Looped BYTE
+  CODE
+  LOOP                                                     ! This method receives all field specific events
+    IF Looped
+      RETURN Level:Notify
+    ELSE
+      Looped = 1
+    END
+  ReturnValue = PARENT.TakeFieldEvent()
+  CASE FIELD()
+  OF ?SLIDER1
+    CASE EVENT()
+    OF EVENT:Selecting
+      !  SliderSelected = True      
+    END
+  END
+    RETURN ReturnValue
+  END
+  ReturnValue = Level:Fatal
+  RETURN ReturnValue
+
+
+ThisWindow.TakeSelected PROCEDURE
+
+ReturnValue          BYTE,AUTO
+
+Looped BYTE
+  CODE
+  LOOP                                                     ! This method receives all Selected events
+    IF Looped
+      RETURN Level:Notify
+    ELSE
+      Looped = 1
+    END
+  ReturnValue = PARENT.TakeSelected()
+    CASE FIELD()
+    OF ?SLIDER1
+      SliderSelected = True      
+    END
     RETURN ReturnValue
   END
   ReturnValue = Level:Fatal
@@ -254,21 +322,26 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?VolumeMeter:Radio1, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio1
   SELF.SetStrategy(?VolumeMeter:Radio2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio2
   SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
+  SELF.SetStrategy(?SLIDER1, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SLIDER1
+  SELF.SetStrategy(?SliderPcntStr, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SliderPcntStr
 
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
-OleTrace        dwrTrace
+!OleTrace        dwrTrace
   CODE
-    OleTrace.Trace('MainOLEEventHandler<9>OLEEvent[' & OLEEvent & ']')
-  Case OLEEvent 
-  Of 301
-    If OcxGetParamCount(ref)
-        AudioDevices.DevideGUID = OcxGetParam(ref, 1)
-        Get(AudioDevices,AudioDevices.DevideGUID)
-        If Errorcode()
-          AudioDevices.ModuleName = OcxGetParam(ref, 2)
-          AudioDevices.Description = OcxGetParam(ref, 3)
-          Add(AudioDevices)
-        End
-    End
-  End 
+    !OleTrace.Trace('MainOLEEventHandler<9>OLEEvent[' & OLEEvent & ']')
+  If OcxGetParamCount(ref)
+    Case OLEEvent 
+    Of 301
+      AudioDevices.DevideGUID = OcxGetParam(ref, 1)
+      Get(AudioDevices,AudioDevices.DevideGUID)
+      If Errorcode()
+        AudioDevices.ModuleName = OcxGetParam(ref, 2)
+        AudioDevices.Description = OcxGetParam(ref, 3)
+        Add(AudioDevices)
+      End
+    Of 302
+    !Glo:SliderPos = OcxGetParam(ref, 1)
+    !POST(Audio:UpdateSliderEvent)   
+    End 
+  End
   RETURN(True)

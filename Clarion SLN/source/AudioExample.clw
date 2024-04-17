@@ -23,6 +23,7 @@ Main                   PROCEDURE   !
    END
    INCLUDE('OCXEVENT.CLW')
 
+Glo:SliderPos        LONG
 SilentRunning        BYTE(0)                               ! Set true when application is running in 'silent mode'
 
 !region File Declaration

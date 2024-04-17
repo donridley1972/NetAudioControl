@@ -18,6 +18,7 @@ using NAudio.Gui;
 using System.Linq.Expressions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography;
 //using WaveFormRenderer;
 
 namespace claAudio
@@ -37,6 +38,7 @@ namespace claAudio
         private string imageFile;
         private string currentPosition;
         private Guid deviceGuid;
+        private int sliderPos;
         //private readonly NAudio.WaveFormRenderer.WaveFormRenderer waveFormRenderer;
         //private WaveFormRendererSettings standardSettings;
 
@@ -52,6 +54,9 @@ namespace claAudio
 
         public event OnSendOutputDevice SendOutputDevice;
         public delegate void OnSendOutputDevice(string pGuid,string pModule,string pDescription);
+
+        public event OnSliderUpdate SliderUpdate;
+        public delegate void OnSliderUpdate(int pTick);
 
         public AudioControl()
         {
@@ -212,15 +217,21 @@ namespace claAudio
         private void OnPlaybackStopped(object sender, StoppedEventArgs args)
         {
             Trace.WriteLine("OnPlaybackStopped");
-            waveformPainter1.Invalidate();
-            waveformPainter2.Invalidate();
-            waveformPainter1.Refresh();
-            waveformPainter2.Refresh();
+            //waveformPainter1.Invalidate();
+            //waveformPainter2.Invalidate();
+            //waveformPainter1.Refresh();
+            //waveformPainter2.Refresh();
 
             //waveformPainter1.Dispose();
             //waveformPainter2.Dispose();
             //this.waveformPainter1 = new NAudio.Gui.WaveformPainter();
             //this.waveformPainter2 = new NAudio.Gui.WaveformPainter();
+
+            //SetSliderPos(100);
+            //if (audioFileReader != null)
+            //{
+            //    audioFileReader.Position = 0;
+            //}
 
             if (outputDevice != null)
             {
@@ -229,6 +240,7 @@ namespace claAudio
             }
             if (audioFileReader != null)
             {
+                audioFileReader.Position = 0;
                 audioFileReader.Dispose();
                 audioFileReader = null;
             }
@@ -237,6 +249,7 @@ namespace claAudio
                 wavePlayer.Dispose();
                 wavePlayer = null;
             }
+
         }
 
         private void CreateDevice()
@@ -260,8 +273,18 @@ namespace claAudio
         void OnPreVolumeMeter(object sender, StreamVolumeEventArgs e)
         {
             // we know it is stereo
+            TimeSpan currentTime = (wavePlayer.PlaybackState == PlaybackState.Stopped) ? TimeSpan.Zero : audioFileReader.CurrentTime;
+            //Trace.WriteLine(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
+            //sliderPos = Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds));
+
+            SetSliderPos(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
+
+            //SliderUpdate(Math.Min(100, (int)(100 * currentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds)));
+
             waveformPainter1.AddMax(e.MaxSampleValues[0]);
             waveformPainter2.AddMax(e.MaxSampleValues[1]);
+
+
         }
 
         void OnPostVolumeMeter(object sender, StreamVolumeEventArgs e)
@@ -303,11 +326,9 @@ namespace claAudio
 
             foreach (var dev in DirectSoundOut.Devices)
             {
-                Trace.WriteLine($"{dev.Guid} {dev.ModuleName} {dev.Description}");
-                //comboBoxOutputDevices.Items.Add(dev.Description);
+                //Trace.WriteLine($"{dev.Guid} {dev.ModuleName} {dev.Description}");
                 outputDevicesItems.Add(new OutputDevicesData { DevideGUID = dev.Guid, ModuleName = dev.ModuleName, Description = dev.Description });
                 //SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description);
-                //Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description)));
                 try
                 {
                     Invoke((Action)(() => SendOutputDevice(dev.Guid.ToString(), dev.ModuleName, dev.Description)));
@@ -315,14 +336,8 @@ namespace claAudio
                 catch (Exception e)
                 {
                     Trace.WriteLine(e.GetType().Name + " : " + e.Message);
-                    //MessageBox.Show(e.GetType().Name + " : " + e.Message);
                 }
             }
-
-            //string jsonReturn = JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
-            //Trace.WriteLine(jsonReturn);
-            //SendOutputDevice(jsonReturn);
-            //return JsonConvert.SerializeObject(outputDevicesItems, Formatting.Indented);
         }
 
         public void SetDeviceGuid(string pGuid)
@@ -356,6 +371,15 @@ namespace claAudio
                 wavePlayer.Dispose();
                 wavePlayer = null;
             }
+
+            foreach (Control control in this.Controls) {
+                if (control != null)
+                {
+                    Trace.WriteLine("Disposing Control [" + control.Name + "]");
+                    control.Dispose();
+                }
+            }
+            //AudioControl
         }
 
         private void AudioControl_Resize(object sender, EventArgs e)
@@ -441,6 +465,26 @@ namespace claAudio
 
         public string GetPosition() { 
             return currentPosition;
+        }
+
+        public int GetSliderPos() { 
+            return sliderPos;
+        }
+
+        private void SetSliderPos(int pos)
+        {
+            sliderPos = pos;
+        }
+
+        public void SetAudioPosition(int pSliderPos) {
+
+            Trace.WriteLine("SetAudioPosition");
+
+            if (wavePlayer != null)
+            {
+                sliderPos = pSliderPos;
+                audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * pSliderPos / 100.0);
+            }
         }
     }
 }
