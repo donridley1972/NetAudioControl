@@ -42,6 +42,7 @@ Play                            Procedure(),Proc,Virtual
 SetAudioPosition                Procedure(long pSliderPos),Proc,Virtual
 SetDeviceGuid                   Procedure(string pDeviceGuid),Proc,Virtual
 SetIsPlaying                    Procedure(byte pVal),Virtual,Proc
+SetVolume                       Procedure(real pVolume),Proc,Virtual
 SetWaveGraphBackGroundColor     Procedure(long pColor,long pGraphNo),Proc,Virtual
 SetWaveGraphForeGroundColor     Procedure(long pColor,long pGraphNo),Proc,Virtual
 SetVolumeMeterForeGroundColor   Procedure(long pColor,long pMeterNo),Proc,Virtual

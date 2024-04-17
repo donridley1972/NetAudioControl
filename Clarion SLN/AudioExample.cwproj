@@ -42,11 +42,6 @@
       <Generated>True</Generated>
       <ProjectGenerated>True</ProjectGenerated>
     </None>
-    <None Include="claAudio.manifest">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Generated>True</Generated>
-      <ProjectGenerated>True</ProjectGenerated>
-    </None>
     <None Include="NAudio.Asio.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Generated>True</Generated>
@@ -95,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="AudioExample.EXE.manifest" />
+    <Library Include="claAudio.manifest" />
   </ItemGroup>
   <Import Project="$(ClarionBinPath)\SoftVelocity.Build.Clarion.targets" />
 </Project>

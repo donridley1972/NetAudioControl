@@ -71,16 +71,16 @@ ___     Newtonsoft.Json.dll
   #ENDIF
 #ENDAt
 #!-------------------------------------------------------------------------------------------------------------------------
-#CONTROL(DwrAudioOLEControl,'DWR Audio OLE/OCX'),DESCRIPTION('DWR Audio OLE/OCX'),Procedure,MULTI    #!,DESCRIPTION('DWR Audio OLE/OCX(' & INSTANCE(%ActiveTemplateInstance) & ')'),MULTI    #!,req(Activate_DwrNetAudioControl)   #!,HLP('~TPLControlOLEControl.htm'),WRAP(OLE) ,WINDOW,WRAP(OLE)
+#CONTROL(DwrAudioOLEControl,'DWR Audio OLE/OCX'),DESCRIPTION('DWR Audio OLE/OCX(' & INSTANCE(%ActiveTemplateInstance) & ')'),Procedure,SINGLE,req(Activate_DwrNetAudioControl)    #!,DESCRIPTION('DWR Audio OLE/OCX(' & INSTANCE(%ActiveTemplateInstance) & ')'),MULTI    #!,req(Activate_DwrNetAudioControl)   #!,HLP('~TPLControlOLEControl.htm'),WRAP(OLE) ,WINDOW,WRAP(OLE)
   CONTROLS
-    Group,AT(,,386,141),USE(?SettingsSheet),Boxed
+    Group,AT(,,451,141),USE(?SettingsSheet),Boxed
         PROMPT('Audio File:'),AT(,,,),USE(?AudioFile:Prompt),TRN
-        ENTRY(@s255),AT(,,,10),USE(AudioFile)
+        ENTRY(@s255),AT(,,187,10),USE(AudioFile)
         BUTTON('...'),AT(,,12,12),USE(?LookupAudioFile)
         PROMPT('Audio Devices:'),AT(,,,),USE(?AudioDevicesPrompt),TRN
-        LIST,AT(,,,10),USE(LastDeviceGuid),DROP(10),FORMAT('1020L(2)M@s255@#3#')
+        LIST,AT(,,202,10),USE(LastDeviceGuid),DROP(10),FORMAT('1020L(2)M@s255@#3#')
         BUTTON('Play'),AT(,,,),USE(?PlayBtn)
-        OLE,USE(?OLE)
+        OLE,AT(,,441,77),USE(?OLE)
         END
     END
   END
@@ -151,10 +151,8 @@ ___     Newtonsoft.Json.dll
 #PROJECT('None(NAudio.WinForms.dll), CopyToOutputDirectory=Always')
 #PROJECT('None(NAudio.WinMM.dll), CopyToOutputDirectory=Always')
 #PROJECT('None(Newtonsoft.Json.dll), CopyToOutputDirectory=Always')
-#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
+#!#PROJECT('None(claAudio.manifest), CopyToOutputDirectory=Always')
 #ENDIF
-
-
 #ENDAT
 #!--------------------------------------------------------------------
 #AT(%GlobalData),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(4000)
@@ -338,6 +336,9 @@ Dispose(AudioDevices)
 #ENDAT
 #! --------------------------------------------------------------------------
 #AT(%AfterGeneratedApplication)
+#IF(NOT VAREXISTS(%pDllManifestFile))
+    #DECLARE(%pDllManifestFile)
+#ENDIF
 #!#IF(%CWVersion > 8000)
 #IF(%GenerateXPManifest=1)
     #IF(%dwrAudioAddDependency = '1')
@@ -346,6 +347,72 @@ Dispose(AudioDevices)
     #ENDIF
 #ENDIF
 #!#ENDIF
+#ENDAT
+#!-------------------------------------------------------------------------------------------------------------------------
+#CONTROL(DwrAudioPanSlider,'DWR Audio Pan Slider'),DESCRIPTION('DWR Audio Pan Slider(' & INSTANCE(%ActiveTemplateInstance) & ')'),Procedure,SINGLE,req(DwrAudioOLEControl)
+  CONTROLS
+    SLIDER,AT(,,,17),USE(?PanSlider),IMM,RANGE(0,100),STEP(1),BELOW,TRN
+  END
+#!--------------------------------------------------------------------
+#AT(%DataSection),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(3000)
+SliderPos            LONG 
+SliderSelected       BYTE
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%ControlEventHandling,'?PanSlider','Accepted'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(8500)
+%rasObjectName.SetAudioPosition(?PanSlider{PROP:SliderPos})
+SliderSelected = False
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%ControlEventHandling,'?PanSlider','NewSelection'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(5000)
+SliderSelected = True
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%WindowManagerMethodCodeSection,'TakeEvent','(),BYTE'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(5000)
+Case EVENT()
+Of EVENT:Timer
+  If SliderPos = 100
+      %rasObjectName.SetIsPlaying(False)
+      ?PlayBtn{PROP:Text} = 'Play'
+  End
+  SliderPos = %rasObjectName.GetSliderPos()
+  If Not SliderSelected
+      ?PanSlider{PROP:SliderPos} = SliderPos
+  End
+#EMBED(%dwrAudoTakeEventAfterSlider,'AudoControl TakeEventAfterSlider')
+End
+#ENDAT
+#!-------------------------------------------------------------------------------------------------------------------------
+#CONTROL(DwrAudioVolumeSlider,'DWR Audio Volume Slider'),DESCRIPTION('DWR Audio Volume Slider(' & INSTANCE(%ActiveTemplateInstance) & ')'),Procedure,SINGLE,req(DwrAudioOLEControl)
+#PREPARE
+#!#IF(NOT VAREXISTS(%VolumePcntStr))
+#!    #DECLARE(%VolumePcntStr)
+#!#ENDIF
+#ENDPREPARE
+  CONTROLS
+    PROMPT('Volume:'),AT(,,27,10),USE(?VolumePrompt),TRN
+    SLIDER,AT(,,,17),USE(AudioVolume),RANGE(0,1000),STEP(100),TRN
+    STRING('VolumePcntStr'),AT(,,49,10),USE(?VolumePcntStr),TRN
+  END
+#! --------------------------------------------------------------------------
+#ATSTART
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%DataSection),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(3000)
+AudioVolume          REAL(1000) 
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%WindowManagerMethodCodeSection,'Init','(),BYTE'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(9990)
+#DECLARE(%VolumePcntStrPropText)
+#SET(%VolumePcntStrPropText,'<39>100 %<39>')
+?VolumePcntStr{PROP:Text} = %VolumePcntStrPropText
+#ENDAT
+#!--------------------------------------------------------------------
+#AT(%ControlEventHandling,'?AudioVolume','Accepted'),WHERE(%NoDwrNetAudioControl=0 And %NoDwrNetAudioControlLocal=0),PRIORITY(8500)
+#!#DECLARE(%VolumePcntStrPropText)
+#SET(%VolumePcntStrPropText,'((AudioVolume/1000) * 100) & <39> %<39>')
+%rasObjectName.SetVolume(AudioVolume/1000)
+?VolumePcntStr{PROP:Text} = %VolumePcntStrPropText
 #ENDAT
 #!------------------------------------------------------------------------------
 #GROUP(%ReadGlobal,%pa,%force)
@@ -424,7 +491,7 @@ Dispose(AudioDevices)
   </dependency>
 #! --------------------------------------------------------------------------
 #GROUP(%dwrCreateDLLManifest)
-  #DECLARE(%pDllManifestFile)
+  #!#DECLARE(%pDllManifestFile)
   #SET(%pDllManifestFile, 'claAudio.manifest')
   #IF(NOT FILEEXISTS(%pDllManifestFile))
     #CREATE(%pDllManifestFile)

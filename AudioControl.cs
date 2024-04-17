@@ -121,8 +121,6 @@ namespace claAudio
         public void Play() {
             if (deviceGuid.ToString() is null) return;
 
-            //AudioControl.SetCountDownTime(1000, true);
-            //AudioControl.
 
             if (outputDevice == null)
             {
@@ -137,8 +135,11 @@ namespace claAudio
 
             try
             {
-                Trace.WriteLine("Attempting CreateWaveOut");
-                CreateWaveOut();
+                if (wavePlayer == null) {
+                    Trace.WriteLine("Attempting CreateWaveOut");
+                    CreateWaveOut();
+                }
+
             }
             catch (Exception driverCreateException)
             {
@@ -171,6 +172,11 @@ namespace claAudio
                 return;
             }
 
+            if (wavePlayer != null)
+            {
+                audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * sliderPos / 100.0);
+            }
+
             outputDevice.Play();
             wavePlayer.Play();
         }
@@ -187,14 +193,19 @@ namespace claAudio
             }
             if (audioFileReader != null)
             {
-                audioFileReader.Dispose();
-                audioFileReader = null;
+                //audioFileReader.Dispose();
+                //audioFileReader = null;
             }
             if (wavePlayer != null)
             {
+                if (wavePlayer.PlaybackState == PlaybackState.Playing)
+                {
+                    wavePlayer.Pause();
+                }
+
                 if (wavePlayer.PlaybackState != PlaybackState.Stopped)
                 {
-                    wavePlayer.Stop();
+                    //wavePlayer.Stop();
                 }
             }
         }
@@ -227,28 +238,29 @@ namespace claAudio
             //this.waveformPainter1 = new NAudio.Gui.WaveformPainter();
             //this.waveformPainter2 = new NAudio.Gui.WaveformPainter();
 
-            SetSliderPos(100);
+            //SetSliderPos(100);
             //if (audioFileReader != null)
             //{
             //    audioFileReader.Position = 0;
             //}
 
-            if (outputDevice != null)
-            {
-                outputDevice.Dispose();
-                outputDevice = null;
-            }
-            if (audioFileReader != null)
-            {
-                audioFileReader.Position = 0;
-                audioFileReader.Dispose();
-                audioFileReader = null;
-            }
-            if (wavePlayer != null)
-            {
-                wavePlayer.Dispose();
-                wavePlayer = null;
-            }
+            //if (outputDevice != null)
+            //{
+            //    outputDevice.Dispose();
+            //    outputDevice = null;
+            //}
+            //if (audioFileReader != null)
+            //{
+            //    audioFileReader.Position = 0;
+            //    audioFileReader.Dispose();
+            //    audioFileReader = null;
+            //}
+            //if (wavePlayer != null)
+            //{
+            //    wavePlayer.Dispose();
+            //    wavePlayer = null;
+            //}
+
 
         }
 

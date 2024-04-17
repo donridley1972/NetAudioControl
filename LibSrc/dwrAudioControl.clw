@@ -75,6 +75,10 @@ dwrAudioControl.SetIsPlaying                    Procedure(byte pVal)    !,Virtua
     CODE
     self.IsPlaying = pVal
 
+dwrAudioControl.SetVolume                       Procedure(real pVolume) !,Proc,Virtual
+    code
+    self.OLEControl{'SetVolume(' & pVolume & ')'}
+
 dwrAudioControl.SetWaveGraphBackGroundColor     Procedure(long pColor,long pGraphNo) !,Proc,Vitrual
 ColorGrp        LIKE(ColorGrpType)
 ColorLng        Long,OVER(ColorGrp)

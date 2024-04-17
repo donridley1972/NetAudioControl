@@ -29,12 +29,12 @@ Graph                LONG                                  !
 VolumeMeter          LONG                                  ! 
 FileFormat           STRING(50)                            ! 
 AudioPosition        STRING(50)                            ! 
-SliderPos            LONG                                  ! 
-SliderSelected       BYTE                                  ! 
-AudioVolume          REAL(1000)                            ! 
 LastDeviceGuid       STRING(50)
 AudioFile            CSTRING(255)
-Window               WINDOW('Audio Example'),AT(,,465,230),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
+AudioVolume          REAL(1000) 
+SliderPos            LONG 
+SliderSelected       BYTE
+Window               WINDOW('Audio Example'),AT(,,465,233),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
   SYSTEM,IMM
                        BUTTON('Close'),AT(427,209),USE(?Close)
                        SHEET,AT(2,2,461,198),USE(?SHEET1)
@@ -51,11 +51,12 @@ Window               WINDOW('Audio Example'),AT(,,465,230),FONT('Segoe UI',9),RE
                              PROMPT('File Format:'),AT(281,29,36,10),USE(?FileFormat:Prompt),TRN
                              STRING(@s50),AT(320,29,132,10),USE(FileFormat),LEFT(2),TRN
                              STRING(@s50),AT(46,62,177),USE(AudioPosition),LEFT(2),TRN
-                             SLIDER,AT(293,58,159,17),USE(AudioVolume),LAYOUT(0),RANGE(0,1000),STEP(100),TRN
-                             PROMPT('Volume:'),AT(262,58,27,10),USE(?VolumePrompt),TRN
+                             SLIDER,AT(301,55,99,17),USE(AudioVolume),RANGE(0,1000),STEP(100),TRN
+                             STRING('VolumePcntStr'),AT(403,59,49,10),USE(?VolumePcntStr),TRN
+                             PROMPT('Volume:'),AT(271,59,27,10),USE(?VolumePrompt),TRN
                            END
-                           SLIDER,AT(8,163,451,17),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW,TRN
                            STRING(''),AT(8,183,451),USE(?SliderPcntStr),CENTER,TRN
+                           SLIDER,AT(8,163,451,17),USE(?PanSlider),IMM,RANGE(0,100),STEP(1),BELOW,TRN
                          END
                          TAB('Options'),USE(?TAB2)
                            OPTION('Graph:'),AT(9,21,177,48),USE(Graph),BOXED,TRN
@@ -146,6 +147,8 @@ ReturnValue          BYTE,AUTO
     myAudio2.SetDeviceGuid(LastDeviceGuid)
   End
   ?LastDeviceGuid{PROP:From} = AudioDevices
+    !
+  ?VolumePcntStr{PROP:Text} = '100 %'
   RETURN ReturnValue
 
 
@@ -201,9 +204,10 @@ Looped BYTE
       End
       FileFormat = myAudio2.GetFileFormat()
     OF ?AudioVolume
-      myAudio2.SetVolume(AudioVolume/1000)      
-    OF ?SLIDER1
-      myAudio2.SetAudioPosition(?SLIDER1{PROP:SliderPos})
+      myAudio2.SetVolume(AudioVolume/1000)
+      ?VolumePcntStr{PROP:Text} = ((AudioVolume/1000) * 100) & ' %'
+    OF ?PanSlider
+      myAudio2.SetAudioPosition(?PanSlider{PROP:SliderPos})
       SliderSelected = False
     OF ?GraphBackGroudColorBtn
       ThisWindow.Update()
@@ -236,21 +240,33 @@ Looped BYTE
     ELSE
       Looped = 1
     END
-    Case EVENT()
-    Of EVENT:Timer
-        If SliderPos = 100
-            myAudio2.SetIsPlaying(False)
-            ?PlayBtn{PROP:Text} = 'Play'
-        End
-        SliderPos = myAudio2.GetSliderPos()
-        !MyTrace.Trace('GetSliderPos[' & myAudio2.GetSliderPos() & ']')
-        If Not SliderSelected
-            ?SLIDER1{PROP:SliderPos} = SliderPos !myAudio2.GetSliderPos()  !Glo:SliderPos
-            ?SliderPcntStr{PROP:Text} = SliderPos & ' %'
-        End
-        AudioPosition = myAudio2.GetPosition()
-    End  
+  !    Case EVENT()
+  !    Of EVENT:Timer
+  !        If SliderPos = 100
+  !            myAudio2.SetIsPlaying(False)
+  !            ?PlayBtn{PROP:Text} = 'Play'
+  !        End
+  !        SliderPos = myAudio2.GetSliderPos()
+  !        MyTrace.Trace('GetSliderPos[' & myAudio2.GetSliderPos() & ']')
+  !        If Not SliderSelected
+  !            ?SLIDER1{PROP:SliderPos} = SliderPos !myAudio2.GetSliderPos()  !Glo:SliderPos
+  !            ?SliderPcntStr{PROP:Text} = SliderPos & ' %'
+  !        End
+  !        AudioPosition = myAudio2.GetPosition()
+  !    End  
   ReturnValue = PARENT.TakeEvent()
+  Case EVENT()
+  Of EVENT:Timer
+    If SliderPos = 100
+        myAudio2.SetIsPlaying(False)
+        ?PlayBtn{PROP:Text} = 'Play'
+    End
+    SliderPos = myAudio2.GetSliderPos()
+    If Not SliderSelected
+        ?PanSlider{PROP:SliderPos} = SliderPos
+    End
+    AudioPosition = myAudio2.GetPosition()  
+  End
     RETURN ReturnValue
   END
   ReturnValue = Level:Fatal
@@ -271,8 +287,8 @@ Looped BYTE
     END
   ReturnValue = PARENT.TakeNewSelection()
     CASE FIELD()
-    OF ?SLIDER1
-      SliderSelected = True      
+    OF ?PanSlider
+      SliderSelected = True
     END
     RETURN ReturnValue
   END
@@ -297,10 +313,7 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?VolumeMeter:Radio1, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio1
   SELF.SetStrategy(?VolumeMeter:Radio2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumeMeter:Radio2
   SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
-  SELF.SetStrategy(?SLIDER1, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SLIDER1
   SELF.SetStrategy(?SliderPcntStr, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SliderPcntStr
-  SELF.SetStrategy(?AudioVolume, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioVolume
-  SELF.SetStrategy(?VolumePrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumePrompt
   SELF.SetStrategy(?SettingsSheet, Resize:LockXPos+Resize:LockYPos, Resize:Resize) ! Override strategy for ?SettingsSheet
   SELF.SetStrategy(?AudioFile:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile:Prompt
   SELF.SetStrategy(?AudioFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile
@@ -311,6 +324,7 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?PlayBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?PlayBtn
   SELF.SetStrategy(?AudioDevicesPrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioDevicesPrompt
   SELF.SetStrategy(?AudioPosition, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioPosition
+  SELF.SetStrategy(?PanSlider, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?PanSlider
 
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
   CODE
