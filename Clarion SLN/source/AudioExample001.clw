@@ -31,9 +31,10 @@ FileFormat           STRING(50)                            !
 AudioPosition        STRING(50)                            ! 
 SliderPos            LONG                                  ! 
 SliderSelected       BYTE                                  ! 
+AudioVolume          REAL(1000)                            ! 
 LastDeviceGuid       STRING(50)
 AudioFile            CSTRING(255)
-Window               WINDOW('Audio Example'),AT(,,463,230),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
+Window               WINDOW('Audio Example'),AT(,,465,230),FONT('Segoe UI',9),RESIZE,ICON(ICON:Clarion),GRAY,MAX, |
   SYSTEM,IMM
                        BUTTON('Close'),AT(427,209),USE(?Close)
                        SHEET,AT(2,2,461,198),USE(?SHEET1)
@@ -50,8 +51,10 @@ Window               WINDOW('Audio Example'),AT(,,463,230),FONT('Segoe UI',9),RE
                              PROMPT('File Format:'),AT(281,29,36,10),USE(?FileFormat:Prompt),TRN
                              STRING(@s50),AT(320,29,132,10),USE(FileFormat),LEFT(2),TRN
                              STRING(@s50),AT(46,62,177),USE(AudioPosition),LEFT(2),TRN
+                             SLIDER,AT(293,58,159,17),USE(AudioVolume),LAYOUT(0),RANGE(0,1000),STEP(100),TRN
+                             PROMPT('Volume:'),AT(262,58,27,10),USE(?VolumePrompt),TRN
                            END
-                           SLIDER,AT(8,163,451,17),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW
+                           SLIDER,AT(8,163,451,17),USE(?SLIDER1),IMM,RANGE(0,100),STEP(1),BELOW,TRN
                            STRING(''),AT(8,183,451),USE(?SliderPcntStr),CENTER,TRN
                          END
                          TAB('Options'),USE(?TAB2)
@@ -197,6 +200,8 @@ Looped BYTE
         myAudio2.Stop()
       End
       FileFormat = myAudio2.GetFileFormat()
+    OF ?AudioVolume
+      myAudio2.SetVolume(AudioVolume/1000)      
     OF ?SLIDER1
       myAudio2.SetAudioPosition(?SLIDER1{PROP:SliderPos})
       SliderSelected = False
@@ -294,6 +299,18 @@ Resizer.Init PROCEDURE(BYTE AppStrategy=AppStrategy:Resize,BYTE SetWindowMinSize
   SELF.SetStrategy(?GraphBackGroudColorBtn:2, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?GraphBackGroudColorBtn:2
   SELF.SetStrategy(?SLIDER1, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SLIDER1
   SELF.SetStrategy(?SliderPcntStr, Resize:LockXPos, Resize:LockHeight) ! Override strategy for ?SliderPcntStr
+  SELF.SetStrategy(?AudioVolume, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioVolume
+  SELF.SetStrategy(?VolumePrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?VolumePrompt
+  SELF.SetStrategy(?SettingsSheet, Resize:LockXPos+Resize:LockYPos, Resize:Resize) ! Override strategy for ?SettingsSheet
+  SELF.SetStrategy(?AudioFile:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile:Prompt
+  SELF.SetStrategy(?AudioFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioFile
+  SELF.SetStrategy(?LookupAudioFile, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?LookupAudioFile
+  SELF.SetStrategy(?LastDeviceGuid, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?LastDeviceGuid
+  SELF.SetStrategy(?FileFormat:Prompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?FileFormat:Prompt
+  SELF.SetStrategy(?FileFormat, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?FileFormat
+  SELF.SetStrategy(?PlayBtn, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?PlayBtn
+  SELF.SetStrategy(?AudioDevicesPrompt, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioDevicesPrompt
+  SELF.SetStrategy(?AudioPosition, Resize:LockXPos+Resize:LockYPos, Resize:LockSize) ! Override strategy for ?AudioPosition
 
 MainOLEEventHandler FUNCTION(*SHORT ref,SIGNED OLEControlFEQ,LONG OLEEvent)
   CODE

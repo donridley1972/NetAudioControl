@@ -478,5 +478,13 @@ namespace claAudio
                 audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * pSliderPos / 100.0);
             }
         }
+
+        public void SetVolume(float pVolume) {
+
+            Trace.WriteLine("SetVolume-pVolume[" + pVolume + "]");
+
+            setVolumeDelegate(pVolume);
+
+        }
     }
 }
